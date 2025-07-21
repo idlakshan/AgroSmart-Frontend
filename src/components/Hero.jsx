@@ -30,7 +30,7 @@ export const Hero = () => {
                         Analyze Your Soil
                     </a>
                     <a
-                        href="#features"
+                        href="#learnmore"
                         className="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-lg text-lg font-medium transition-colors border border-white/20 backdrop-blur-sm"
                     >
                         Learn More
