@@ -19,8 +19,8 @@ export const Hero = () => {
                     Precision Agriculture with <span className="text-green-300"></span> Soil Analysis
 
                 </h1>
-                <p className="text-xl md:text-2xl text-white/95 mb-10 max-w-xl">
-                    Snap, upload, grow smarter!
+                <p className="text-xl md:text-2xl text-white/95 mb-10 max-w-xl bg-amber-500 p-2 rounded-xl">
+                    Snap, upload, grow smarter !
                 </p>
 
 
