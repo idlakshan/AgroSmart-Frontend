@@ -5,6 +5,7 @@ import { Hero } from './components/Hero'
 import LearnMoreSeaction from './components/LearnMoreSection'
 import { Navbar } from './components/Navbar'
 import SoilAnalysis from './components/SoilAnalysis'
+import CropRecomandation from './components/CropRecomandation'
 
 
 
@@ -14,6 +15,8 @@ function App() {
   const [selectedDistrict, setSelectedDistrict] = useState(null);
   const [heatMapUrl, setHeatMapUrl] = useState(null);
   const [showResults, setShowResults] = useState(false);
+  const [sortBy, setSortBy] = useState('confidence');
+  const [filterCategory, setFilterCategory] = useState('all');
 
   const handleSoilAnalysis = (type, conf, heatMap) => {
     setSoilType(type);
@@ -24,6 +27,10 @@ function App() {
 
   const handleDistrictSelect = (district) => {
     setSelectedDistrict(district);
+  };
+
+    const handleCropClick = (crop) => {
+    setSelectedCrop(crop);
   };
 
   const handleClear = () => {
@@ -49,7 +56,13 @@ function App() {
           confidence={confidence}
           heatMapUrl={heatMapUrl}
         />
-      
+        {showResults && selectedDistrict && (
+          <CropRecomandation
+            soilType={soilType || ''}
+            district={selectedDistrict}
+            sortBy={sortBy} setSortBy={setSortBy} filterCategory={filterCategory} setFilterCategory={setFilterCategory} onCropClick={handleCropClick}
+          />
+        )}
         <LearnMoreSeaction />
       </main>
       {/* <SoilAnalysis/> */}

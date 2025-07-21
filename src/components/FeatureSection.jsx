@@ -36,7 +36,7 @@ export const FeatureSection = () => {
   ];
 
   return (
-    <section id="features" className="py-16 px-4 md:px-8 bg-gray-50">
+    <section id="features" className="pt-16 pb-14 px-4 md:px-8 bg-gray-50">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
           Features
