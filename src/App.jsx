@@ -6,6 +6,7 @@ import LearnMoreSeaction from './components/LearnMoreSection'
 import { Navbar } from './components/Navbar'
 import SoilAnalysis from './components/SoilAnalysis'
 import CropRecomandation from './components/CropRecomandation'
+import { CropModal } from './components/CropModel'
 
 
 
@@ -17,6 +18,7 @@ function App() {
   const [showResults, setShowResults] = useState(false);
   const [sortBy, setSortBy] = useState('confidence');
   const [filterCategory, setFilterCategory] = useState('all');
+   const [selectedCrop, setSelectedCrop] = useState(null);
 
   const handleSoilAnalysis = (type, conf, heatMap) => {
     setSoilType(type);
@@ -29,7 +31,7 @@ function App() {
     setSelectedDistrict(district);
   };
 
-    const handleCropClick = (crop) => {
+  const handleCropClick = (crop) => {
     setSelectedCrop(crop);
   };
 
@@ -39,6 +41,10 @@ function App() {
     setSelectedDistrict(null);
     setHeatMapUrl(null);
     setShowResults(false);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedCrop(null);
   };
 
   return (
@@ -57,11 +63,20 @@ function App() {
           heatMapUrl={heatMapUrl}
         />
         {showResults && selectedDistrict && (
-          <CropRecomandation
-            soilType={soilType || ''}
-            district={selectedDistrict}
-            sortBy={sortBy} setSortBy={setSortBy} filterCategory={filterCategory} setFilterCategory={setFilterCategory} onCropClick={handleCropClick}
-          />
+          <>
+            <CropRecomandation
+              soilType={soilType || ''}
+              district={selectedDistrict}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              filterCategory={filterCategory}
+              setFilterCategory={setFilterCategory}
+              onCropClick={handleCropClick}
+            />
+            {selectedCrop && (
+              <CropModal crop={selectedCrop} onClose={handleCloseModal} />
+            )}
+          </>
         )}
         <LearnMoreSeaction />
       </main>

@@ -45,7 +45,7 @@ const SoilAnalysis = ({
       const soilTypes = ['Clay Loam', 'Sandy Loam', 'Silt Loam', 'Clay', 'Sandy'];
       const randomSoilType = soilTypes[Math.floor(Math.random() * soilTypes.length)];
       const randomConfidence = Math.round((0.7 + Math.random() * 0.25) * 100) / 100;
-      const heatmapUrl = 'https://miro.medium.com/v2/resize:fit:1400/1*FJMsJMsGqy9jQJQb5-SAeg.png';
+      const heatmapUrl = 'https://growtraffic-bc85.kxcdn.com/blog/wp-content/uploads/2015/03/Heatmap.png';
       onAnalysisComplete(randomSoilType, randomConfidence, heatmapUrl);
       setIsAnalyzing(false);
     }, 2000);

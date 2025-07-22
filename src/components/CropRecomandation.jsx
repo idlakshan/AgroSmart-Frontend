@@ -110,19 +110,19 @@ const CropRecomandation = ({ sortBy,
     return (
         <section id="soil-analysis" className="py-16 px-4 md:px-8 bg-gray-50">
             <div className="max-w-6xl mx-auto">
-                <div className='mb-16'>
+                <div className='mb-12'>
                     <h2 className="text-3xl font-bold text-gray-800">Recommended Crops</h2>
                     <p className="text-gray-600 mt-2 ">
                         Tailored crop recommendations based on your selections to help you farm smarter.
                     </p>
                 </div>
 
-                <span className="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
+                {/* <span className="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full" >
                     {filteredCrops.length} crops found
-                </span>
+                </span> */}
 
 
-                <FilterSort sortBy={sortBy} setSortBy={setSortBy} filterCategory={filterCategory} setFilterCategory={setFilterCategory} />
+                <FilterSort  sortBy={sortBy} setSortBy={setSortBy} filterCategory={filterCategory} setFilterCategory={setFilterCategory} />
                 <hr className="my-6 border-t border-gray-200" />
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {sortedCrops.map(crop => <CropCard key={crop.id} crop={crop} onClick={onCropClick} />)}
