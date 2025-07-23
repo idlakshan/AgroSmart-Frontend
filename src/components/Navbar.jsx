@@ -7,7 +7,7 @@ export const Navbar = () => {
   return (
     <nav className="bg-white/80 backdrop-blur-md shadow-sm py-3 px-6 md:px-12 sticky top-0 z-50 border-b border-gray-100">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-      
+
         <div className="flex items-center space-x-2 group">
           <LeafIcon className="h-7 w-7 text-green-600 group-hover:rotate-12 transition-transform duration-300" />
           <span className="font-heading font-bold text-2xl text-green-800 hover:text-green-700 transition-colors">
@@ -15,7 +15,7 @@ export const Navbar = () => {
           </span>
         </div>
 
-    
+
         <div className="hidden md:flex items-center space-x-8 font-body">
           {["Soil Analysis", "Recommendations", "Features", "About"].map((item) => (
             <a
@@ -39,6 +39,12 @@ export const Navbar = () => {
 
 
         <div className="hidden md:flex items-center space-x-4 font-body">
+          <a
+            href="/admin/crops"
+            className="text-green-700 font-medium hover:underline hover:text-green-800 transition-all"
+          >
+            Admin
+          </a>
           <button className="p-2 bg-green-50 rounded-full text-green-600 hover:bg-green-100 transition-all hover:scale-105 shadow-sm">
             <UserIcon className="h-5 w-5" />
           </button>
@@ -46,9 +52,10 @@ export const Navbar = () => {
             Get Started
           </button>
         </div>
+
       </div>
 
-  
+
       {isMenuOpen && (
         <div className="md:hidden bg-white/95 mt-2 py-3 px-6 rounded-lg shadow-lg animate-fadeIn">
           {["Soil Analysis", "Recommendations", "Features", "About"].map((item) => (

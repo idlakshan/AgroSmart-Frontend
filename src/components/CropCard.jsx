@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const CropCard = ({ crop, onClick }) => {
   return (
     <div
@@ -30,3 +28,5 @@ export const CropCard = ({ crop, onClick }) => {
     </div>
   );
 };
+
+

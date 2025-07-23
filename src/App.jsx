@@ -1,15 +1,15 @@
-import { useState } from 'react'
+import { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 
-import { Footer } from './components/Footer'
-import { Navbar } from './components/Navbar'
-import SoilAnalysis from './components/SoilAnalysis'
-import CropRecomandation from './components/CropRecomandation'
-import { CropModal } from './components/CropModel'
-import { FeatureSection } from './pages/FeatureSection'
-import { HeroSection } from './pages/HeroSection'
-import LearnMoreSeaction from './pages/LearnMoreSection'
-
-
+import { Navbar } from './components/Navbar';
+import { Footer } from './components/Footer';
+import SoilAnalysis from './components/SoilAnalysis';
+import CropRecomandation from './components/CropRecomandation';
+import { CropModal } from './components/CropModel';
+import { FeatureSection } from './pages/FeatureSection';
+import { HeroSection } from './pages/HeroSection';
+import LearnMoreSeaction from './pages/LearnMoreSection';
+import AdminCrops from './pages/AdminCrops'; 
 
 function App() {
   const [soilType, setSoilType] = useState(null);
@@ -19,7 +19,7 @@ function App() {
   const [showResults, setShowResults] = useState(false);
   const [sortBy, setSortBy] = useState('confidence');
   const [filterCategory, setFilterCategory] = useState('all');
-   const [selectedCrop, setSelectedCrop] = useState(null);
+  const [selectedCrop, setSelectedCrop] = useState(null);
 
   const handleSoilAnalysis = (type, conf, heatMap) => {
     setSoilType(type);
@@ -51,41 +51,52 @@ function App() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <Navbar />
-      <HeroSection />
-      <FeatureSection />
-      <main className="flex-grow">
-        <SoilAnalysis
-          onAnalysisComplete={handleSoilAnalysis}
-          onDistrictSelect={handleDistrictSelect}
-          onClear={handleClear}
-          selectedDistrict={selectedDistrict}
-          soilType={soilType}
-          confidence={confidence}
-          heatMapUrl={heatMapUrl}
-        />
-        {showResults && selectedDistrict && (
-          <>
-            <CropRecomandation
-              soilType={soilType || ''}
-              district={selectedDistrict}
-              sortBy={sortBy}
-              setSortBy={setSortBy}
-              filterCategory={filterCategory}
-              setFilterCategory={setFilterCategory}
-              onCropClick={handleCropClick}
-            />
-            {selectedCrop && (
-              <CropModal crop={selectedCrop} onClose={handleCloseModal} />
-            )}
-          </>
-        )}
-        <LearnMoreSeaction />
-      </main>
-      {/* <SoilAnalysis/> */}
 
-      <Footer />
+      <Routes>
+
+        <Route
+          path="/"
+          element={
+            <>
+              <HeroSection />
+              <FeatureSection />
+              <main className="flex-grow">
+                <SoilAnalysis
+                  onAnalysisComplete={handleSoilAnalysis}
+                  onDistrictSelect={handleDistrictSelect}
+                  onClear={handleClear}
+                  selectedDistrict={selectedDistrict}
+                  soilType={soilType}
+                  confidence={confidence}
+                  heatMapUrl={heatMapUrl}
+                />
+                {showResults && selectedDistrict && (
+                  <>
+                    <CropRecomandation
+                      soilType={soilType || ''}
+                      district={selectedDistrict}
+                      sortBy={sortBy}
+                      setSortBy={setSortBy}
+                      filterCategory={filterCategory}
+                      setFilterCategory={setFilterCategory}
+                      onCropClick={handleCropClick}
+                    />
+                    {selectedCrop && (
+                      <CropModal crop={selectedCrop} onClose={handleCloseModal} />
+                    )}
+                  </>
+                )}
+                <LearnMoreSeaction />
+              </main>
+              <Footer />
+            </>
+          }
+        />
+
+        <Route path="/admin/crops" element={<AdminCrops />} />
+      </Routes>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
