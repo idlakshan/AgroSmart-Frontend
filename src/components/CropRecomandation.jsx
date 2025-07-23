@@ -1,4 +1,3 @@
-import React from 'react'
 import { FilterSort } from './FilterSort';
 import { CropCard } from './CropCard';
 

@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { FeatureSection } from './components/FeatureSection'
+
 import { Footer } from './components/Footer'
-import { Hero } from './components/Hero'
-import LearnMoreSeaction from './components/LearnMoreSection'
 import { Navbar } from './components/Navbar'
 import SoilAnalysis from './components/SoilAnalysis'
 import CropRecomandation from './components/CropRecomandation'
 import { CropModal } from './components/CropModel'
+import { FeatureSection } from './pages/FeatureSection'
+import { HeroSection } from './pages/HeroSection'
+import LearnMoreSeaction from './pages/LearnMoreSection'
 
 
 
@@ -50,7 +51,7 @@ function App() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <Navbar />
-      <Hero />
+      <HeroSection />
       <FeatureSection />
       <main className="flex-grow">
         <SoilAnalysis
