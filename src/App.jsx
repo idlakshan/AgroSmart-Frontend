@@ -11,6 +11,9 @@ import { HeroSection } from './pages/HeroSection';
 import LearnMoreSeaction from './pages/LearnMoreSection';
 import AdminCrops from './pages/AdminCrops'; 
 
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 function App() {
   const [soilType, setSoilType] = useState(null);
   const [confidence, setConfidence] = useState(null);
@@ -89,12 +92,14 @@ function App() {
                 <LearnMoreSeaction />
               </main>
               <Footer />
+             
             </>
           }
         />
 
         <Route path="/admin/crops" element={<AdminCrops />} />
       </Routes>
+       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }
