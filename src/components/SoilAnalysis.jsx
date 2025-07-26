@@ -52,7 +52,7 @@ const SoilAnalysis = ({
   };
 
   return (
-    <section id="soil-analysis" className="py-16 px-4 md:px-8 bg-gray-50">
+    <section id="analysis" className="py-16 px-4 md:px-8 bg-gray-50">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">Soil Evaluation</h2>
         <p className="text-center text-gray-600 mb-12">
