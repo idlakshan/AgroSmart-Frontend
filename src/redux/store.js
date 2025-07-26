@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import cropReducer from "./features/cropSlice";
-import { cropApi } from "./features/crop/cropApi";
+import cropApi from './features/crop/cropApi';
 
 export const store = configureStore({
   reducer: {

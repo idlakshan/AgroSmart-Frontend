@@ -1,10 +1,12 @@
 import { LeafIcon, MenuIcon, SunIcon, DropletsIcon, SproutIcon } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/clerk-react";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user } = useUser();
+  const role = user?.publicMetadata?.role;
 
   return (
     <nav className="bg-white/90 backdrop-blur-lg shadow-sm py-3 px-6 md:px-12 sticky top-0 z-50 border-b border-green-100">
@@ -47,15 +49,16 @@ export const Navbar = () => {
           <MenuIcon className="h-6 w-6" />
         </button>
 
-   
-        <div className="hidden md:flex items-center space-x-4">
-          <Link
-            to="/admin/crops"
-            className="text-green-700 font-medium hover:text-green-800 transition-all flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-green-50"
-          >
-            <span>Admin</span>
-          </Link>
 
+        <div className="hidden md:flex items-center space-x-4">
+          {role === "admin" && (
+            <Link
+              to="/admin/crops"
+              className="text-green-700 font-medium hover:text-green-800 transition-all flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-green-50"
+            >
+              <span>Admin</span>
+            </Link>
+          )}
           <SignedOut>
             <div className="flex items-center gap-3">
               <Link
@@ -90,7 +93,7 @@ export const Navbar = () => {
         </div>
       </div>
 
- 
+
       {isMenuOpen && (
         <div className="md:hidden bg-white mt-2 py-2 px-4 rounded-lg shadow-lg animate-fadeIn border border-green-50">
           {[
