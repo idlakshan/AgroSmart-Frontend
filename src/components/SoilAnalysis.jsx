@@ -9,6 +9,9 @@ import {
   XIcon,
   InfoIcon
 } from 'lucide-react';
+import { useUser } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
+
 
 const districts = [
   'Ampara', 'Anuradhapura', 'Badulla', 'Batticaloa', 'Colombo', 'Galle', 'Gampaha',
@@ -29,6 +32,9 @@ const SoilAnalysis = ({
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const { isSignedIn } = useUser();
+  const navigate = useNavigate();
+
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -38,18 +44,25 @@ const SoilAnalysis = ({
     }
   };
 
-  const handleAnalyze = () => {
-    if (!selectedImage || !selectedDistrict) return;
-    setIsAnalyzing(true);
-    setTimeout(() => {
-      const soilTypes = ['Clay Loam', 'Sandy Loam', 'Silt Loam', 'Clay', 'Sandy'];
-      const randomSoilType = soilTypes[Math.floor(Math.random() * soilTypes.length)];
-      const randomConfidence = Math.round((0.7 + Math.random() * 0.25) * 100) / 100;
-      const heatmapUrl = 'https://growtraffic-bc85.kxcdn.com/blog/wp-content/uploads/2015/03/Heatmap.png';
-      onAnalysisComplete(randomSoilType, randomConfidence, heatmapUrl);
-      setIsAnalyzing(false);
-    }, 2000);
-  };
+const handleAnalyze = () => {
+  if (!isSignedIn) {
+    navigate("/sign-in");
+    return;
+  }
+
+  if (!selectedImage || !selectedDistrict) return;
+
+  setIsAnalyzing(true);
+  setTimeout(() => {
+    const soilTypes = ['Clay Loam', 'Sandy Loam', 'Silt Loam', 'Clay', 'Sandy'];
+    const randomSoilType = soilTypes[Math.floor(Math.random() * soilTypes.length)];
+    const randomConfidence = Math.round((0.7 + Math.random() * 0.25) * 100) / 100;
+    const heatmapUrl = 'https://growtraffic-bc85.kxcdn.com/blog/wp-content/uploads/2015/03/Heatmap.png';
+    onAnalysisComplete(randomSoilType, randomConfidence, heatmapUrl);
+    setIsAnalyzing(false);
+  }, 2000);
+};
+
 
   return (
     <section id="analysis" className="py-16 px-4 md:px-8 bg-gray-50">
@@ -124,11 +137,10 @@ const SoilAnalysis = ({
             </div>
             <div className="mt-6 flex space-x-3">
               <button
-                className={`flex-grow py-3 rounded-lg font-medium flex items-center justify-center ${
-                  selectedImage && selectedDistrict
+                className={`flex-grow py-3 rounded-lg font-medium flex items-center justify-center ${selectedImage && selectedDistrict
                     ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white'
                     : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                }`}
+                  }`}
                 disabled={!selectedImage || !selectedDistrict || isAnalyzing}
                 onClick={handleAnalyze}
               >
@@ -177,7 +189,7 @@ const SoilAnalysis = ({
                   </div>
                 )}
                 {selectedDistrict && (
-                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center">
                         <MapPinIcon className="h-5 w-5 text-emerald-600 mr-2" />
