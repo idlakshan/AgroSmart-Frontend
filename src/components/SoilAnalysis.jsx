@@ -40,17 +40,21 @@ const SoilAnalysis = ({
   const { isSignedIn } = useUser();
   const navigate = useNavigate();
 
-  const [fetchWeather, { data: weatherData, isLoading: isWeatherLoading, isError: weatherError }] =useGetWeatherByDistrictMutation();
+  const [fetchWeather, { data: weatherData, isLoading: isWeatherLoading, isError: weatherError }] = useGetWeatherByDistrictMutation();
   const [analyzeSoil, { isLoading: isSoilLoading, isError: soilError }] = useAnalyzeSoilMutation();
+
+  const clearPrediction = () => onAnalysisComplete(null, null, null);
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
+      clearPrediction();
       const file = e.target.files[0];
       setSelectedImage(file);
       setPreviewUrl(URL.createObjectURL(file));
     }
   };
-  
+
+
 
   const handleAnalyze = async () => {
     if (!isSignedIn) {
@@ -66,10 +70,10 @@ const SoilAnalysis = ({
       const weather = await fetchWeather(selectedDistrict).unwrap();
 
       // 2) Soil + heatmap from Flask
-      const soil = await analyzeSoil(selectedImage).unwrap(); 
-      const fullHeatmapUrl = soil.image_url?.startsWith('http')
-        ? soil.image_url
-        : `${FLASK_BASE}${soil.image_url}`;
+      const soil = await analyzeSoil(selectedImage).unwrap();
+      const url = new URL(soil.image_url, FLASK_BASE);
+      url.searchParams.set('t', Date.now().toString());
+      const fullHeatmapUrl = url.toString();
 
       onAnalysisComplete(soil.label, Number(soil.confidence) / 100, fullHeatmapUrl);
 
@@ -114,7 +118,7 @@ const SoilAnalysis = ({
                 <img src={previewUrl} alt="Soil preview" className="w-full h-64 object-cover rounded-lg" />
                 <button
                   className="absolute top-2 right-2 bg-red-500 p-2 rounded-full text-white hover:bg-red-600 transition-colors"
-                  onClick={() => { setSelectedImage(null); setPreviewUrl(null); }}
+                  onClick={() => { setSelectedImage(null); setPreviewUrl(null); clearPrediction(); }}
                 >
                   <TrashIcon className="h-4 w-4" />
                 </button>
@@ -156,11 +160,10 @@ const SoilAnalysis = ({
 
             <div className="mt-6 flex space-x-3">
               <button
-                className={`flex-grow py-3 rounded-lg font-medium flex items-center justify-center ${
-                  selectedImage && selectedDistrict
-                    ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white'
-                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                }`}
+                className={`flex-grow py-3 rounded-lg font-medium flex items-center justify-center ${selectedImage && selectedDistrict
+                  ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white'
+                  : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  }`}
                 disabled={!selectedImage || !selectedDistrict || isAnalyzing}
                 onClick={handleAnalyze}
               >
@@ -169,7 +172,10 @@ const SoilAnalysis = ({
               </button>
               <button
                 className="w-1/4 py-3 rounded-lg font-medium hover:bg-gray-300 border border-gray-300 flex items-center justify-center"
-                onClick={onClear}
+                onClick={() => {
+                  clearPrediction();
+                  onClear();
+                }}
               >
                 <XIcon className="h-5 w-5 mr-2" />
                 Clear
@@ -177,7 +183,7 @@ const SoilAnalysis = ({
             </div>
           </div>
 
-  
+
 
           <div className="bg-white p-6 rounded-xl shadow-sm">
             {!soilType ? (
@@ -186,7 +192,7 @@ const SoilAnalysis = ({
               </div>
             ) : (
               <div className="space-y-6">
-       
+
                 {heatMapUrl && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
@@ -212,7 +218,7 @@ const SoilAnalysis = ({
                   </div>
                 )}
 
-        
+
                 {selectedDistrict && (
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
                     <div className="flex items-center justify-between mb-4">
@@ -232,7 +238,7 @@ const SoilAnalysis = ({
                     ) : weatherData ? (
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                       
+
                           <div className="flex items-center space-x-3">
                             <div className="p-2 bg-amber-50 rounded-lg text-amber-600">
                               <ThermometerIcon className="h-5 w-5" />
@@ -245,7 +251,7 @@ const SoilAnalysis = ({
                             </div>
                           </div>
 
-            
+
                           <div className="flex items-center space-x-3">
                             <div className="p-2 bg-teal-50 rounded-lg text-teal-600">
                               <DropletIcon className="h-5 w-5" />
@@ -258,7 +264,7 @@ const SoilAnalysis = ({
                             </div>
                           </div>
 
-                      
+
                           <div className="flex items-center space-x-3">
                             <div className="p-2 bg-sky-50 rounded-lg text-sky-600">
                               <CloudRainIcon className="h-5 w-5" />
