@@ -23,6 +23,7 @@ function App() {
   const [sortBy, setSortBy] = useState('confidence');
   const [filterCategory, setFilterCategory] = useState('all');
   const [selectedCrop, setSelectedCrop] = useState(null);
+  
 
   const handleSoilAnalysis = (type, conf, heatMap) => {
     setSoilType(type);
