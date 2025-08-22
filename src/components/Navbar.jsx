@@ -1,4 +1,10 @@
-import { LeafIcon, MenuIcon, SunIcon, DropletsIcon, SproutIcon } from "lucide-react";
+import {
+  LeafIcon,
+  MenuIcon,
+  SunIcon,
+  DropletsIcon,
+  SproutIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/clerk-react";
@@ -11,7 +17,6 @@ export const Navbar = () => {
   return (
     <nav className="bg-white/90 backdrop-blur-lg shadow-sm py-3 px-6 md:px-12 sticky top-0 z-50 border-b border-green-100">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-
         <Link to="/" className="flex items-center space-x-2 group">
           <div className="relative">
             <LeafIcon className="h-7 w-7 text-green-600 group-hover:rotate-12 transition-transform duration-300" />
@@ -21,7 +26,6 @@ export const Navbar = () => {
             AgroSmart
           </span>
         </Link>
-
 
         <div className="hidden md:flex items-center space-x-8 font-medium">
           {[
@@ -41,14 +45,12 @@ export const Navbar = () => {
           ))}
         </div>
 
-
         <button
           className="md:hidden p-2 rounded-lg hover:bg-green-50 text-gray-600 hover:text-green-600 transition-colors"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           <MenuIcon className="h-6 w-6" />
         </button>
-
 
         <div className="hidden md:flex items-center space-x-4">
           {role === "admin" && (
@@ -72,7 +74,17 @@ export const Navbar = () => {
                 className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-500 text-white font-medium rounded-lg hover:from-green-700 hover:to-green-600 transition flex items-center gap-1.5 shadow-sm hover:shadow-md"
               >
                 <span>Get Started</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M5 12h14"></path>
                   <path d="m12 5 7 7-7 7"></path>
                 </svg>
@@ -82,22 +94,27 @@ export const Navbar = () => {
 
           <SignedIn>
             <div className="border-l border-green-100 pl-4">
-              <UserButton appearance={{
-                elements: {
-                  userButtonAvatarBox: "h-8 w-8",
-                  userButtonOuterIdentifier: "text-sm font-medium text-gray-700"
-                }
-              }} />
+              <UserButton
+                appearance={{
+                  elements: {
+                    userButtonAvatarBox: "h-8 w-8",
+                    userButtonOuterIdentifier:
+                      "text-sm font-medium text-gray-700",
+                  },
+                }}
+              />
             </div>
           </SignedIn>
         </div>
       </div>
 
-
       {isMenuOpen && (
         <div className="md:hidden bg-white mt-2 py-2 px-4 rounded-lg shadow-lg animate-fadeIn border border-green-50">
           {[
-            { name: "Soil Analysis", icon: <DropletsIcon className="h-4 w-4" /> },
+            {
+              name: "Soil Analysis",
+              icon: <DropletsIcon className="h-4 w-4" />,
+            },
             { name: "Crop Health", icon: <SproutIcon className="h-4 w-4" /> },
             { name: "Recommendations", icon: <LeafIcon className="h-4 w-4" /> },
           ].map((item) => (
@@ -137,7 +154,17 @@ export const Navbar = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 <span>Get Started</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M5 12h14"></path>
                   <path d="m12 5 7 7-7 7"></path>
                 </svg>
@@ -146,12 +173,15 @@ export const Navbar = () => {
 
             <SignedIn>
               <div className="flex justify-center py-2">
-                <UserButton appearance={{
-                  elements: {
-                    userButtonAvatarBox: "h-8 w-8",
-                    userButtonOuterIdentifier: "text-sm font-medium text-gray-700"
-                  }
-                }} />
+                <UserButton
+                  appearance={{
+                    elements: {
+                      userButtonAvatarBox: "h-8 w-8",
+                      userButtonOuterIdentifier:
+                        "text-sm font-medium text-gray-700",
+                    },
+                  }}
+                />
               </div>
             </SignedIn>
           </div>

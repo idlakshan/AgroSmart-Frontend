@@ -7,11 +7,12 @@ import {
   DropletIcon,
   SearchIcon,
   XIcon,
-  InfoIcon
+  InfoIcon,
+  CloudRainIcon
 } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
-
+import { useGetWeatherByDistrictMutation } from '../redux/features/weather/weatherApi';
 
 const districts = [
   'Ampara', 'Anuradhapura', 'Badulla', 'Batticaloa', 'Colombo', 'Galle', 'Gampaha',
@@ -36,6 +37,8 @@ const SoilAnalysis = ({
   const navigate = useNavigate();
 
 
+  const [fetchWeather, { data: weatherData, isLoading: isWeatherLoading, isError: weatherError }] = useGetWeatherByDistrictMutation();
+
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -44,25 +47,33 @@ const SoilAnalysis = ({
     }
   };
 
-const handleAnalyze = () => {
-  if (!isSignedIn) {
-    navigate("/sign-in");
-    return;
-  }
+  
 
-  if (!selectedImage || !selectedDistrict) return;
+  const handleAnalyze = async () => {
+    if (!isSignedIn) {
+      navigate("/sign-in");
+      return;
+    }
+    if (!selectedImage || !selectedDistrict) return;
 
-  setIsAnalyzing(true);
-  setTimeout(() => {
-    const soilTypes = ['Clay Loam', 'Sandy Loam', 'Silt Loam', 'Clay', 'Sandy'];
-    const randomSoilType = soilTypes[Math.floor(Math.random() * soilTypes.length)];
-    const randomConfidence = Math.round((0.7 + Math.random() * 0.25) * 100) / 100;
-    const heatmapUrl = 'https://growtraffic-bc85.kxcdn.com/blog/wp-content/uploads/2015/03/Heatmap.png';
-    onAnalysisComplete(randomSoilType, randomConfidence, heatmapUrl);
-    setIsAnalyzing(false);
-  }, 2000);
-};
+    try {
+      setIsAnalyzing(true);
 
+      await fetchWeather(selectedDistrict).unwrap();
+
+      setTimeout(() => {
+        const soilTypes = ['Clay Loam', 'Sandy Loam', 'Silt Loam', 'Clay', 'Sandy'];
+        const randomSoilType = soilTypes[Math.floor(Math.random() * soilTypes.length)];
+        const randomConfidence = Math.round((0.7 + Math.random() * 0.25) * 100) / 100;
+        const heatmapUrl = 'https://growtraffic-bc85.kxcdn.com/blog/wp-content/uploads/2015/03/Heatmap.png';
+        onAnalysisComplete(randomSoilType, randomConfidence, heatmapUrl);
+        setIsAnalyzing(false);
+      }, 800);
+    } catch (e) {
+      console.error('Weather fetch failed', e);
+      setIsAnalyzing(false);
+    }
+  };
 
   return (
     <section id="analysis" className="py-16 px-4 md:px-8 bg-gray-50">
@@ -156,6 +167,7 @@ const handleAnalyze = () => {
               </button>
             </div>
           </div>
+
           <div className="bg-white p-6 rounded-xl shadow-sm">
             {!soilType ? (
               <div className="h-64 flex items-center justify-center border border-gray-200 rounded-lg">
@@ -188,6 +200,7 @@ const handleAnalyze = () => {
                     </p>
                   </div>
                 )}
+
                 {selectedDistrict && (
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
                     <div className="flex items-center justify-between mb-4">
@@ -195,32 +208,61 @@ const handleAnalyze = () => {
                         <MapPinIcon className="h-5 w-5 text-emerald-600 mr-2" />
                         <h4 className="text-lg font-medium text-gray-800">{selectedDistrict}</h4>
                       </div>
-                      <span className="text-xs text-emerald-600 font-medium">Past  6 months</span>
+                      <span className="text-xs text-emerald-600 font-medium">Annual Data</span>
                     </div>
 
                     <hr className="border-t border-gray-100 my-4" />
 
-                    <div className="flex justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-amber-50 rounded-lg text-amber-600">
-                          <ThermometerIcon className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Avg Temp</p>
-                          <p className="font-medium text-gray-800">23°C</p>
-                        </div>
-                      </div>
 
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-teal-50 rounded-lg text-teal-600">
-                          <DropletIcon className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Avg Humidity</p>
-                          <p className="font-medium text-gray-800">78%</p>
+                    {isWeatherLoading ? (
+                      <p className="text-gray-500">Loading weather...</p>
+                    ) : weatherError ? (
+                      <p className="text-red-500">Failed to load weather data</p>
+                    ) : weatherData ? (
+                      <div className="space-y-4">
+                        <div className="flex justify-between">
+
+                          <div className="flex items-center space-x-3">
+                            <div className="p-2 bg-amber-50 rounded-lg text-amber-600">
+                              <ThermometerIcon className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500">Avg Temp</p>
+                              <p className="font-medium text-gray-800">
+                                {Number(weatherData.avg_temp_annual).toFixed(1)}°C
+                              </p>
+                            </div>
+                          </div>
+
+
+                          <div className="flex items-center space-x-3">
+                            <div className="p-2 bg-teal-50 rounded-lg text-teal-600">
+                              <DropletIcon className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500">Avg Humidity</p>
+                              <p className="font-medium text-gray-800">
+                                {Number(weatherData.avg_humidity_annual).toFixed(2)}%
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center space-x-3">
+                            <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                              <CloudRainIcon  className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500">Annual Rainfall</p>
+                              <p className="font-medium text-gray-800">
+                                {Number(weatherData.total_rainfall_annual).toFixed(1)} mm
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    ) : (
+                      <p className="text-gray-500">Click “Get Crop Suggestions” to load weather</p>
+                    )}
                   </div>
                 )}
               </div>
