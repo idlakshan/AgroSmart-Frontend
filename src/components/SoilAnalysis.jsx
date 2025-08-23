@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   UploadCloudIcon,
   TrashIcon,
@@ -8,21 +8,21 @@ import {
   SearchIcon,
   XIcon,
   InfoIcon,
-  CloudRainIcon
-} from 'lucide-react';
-import { useUser } from '@clerk/clerk-react';
-import { useNavigate } from 'react-router-dom';
-import { useGetWeatherByDistrictMutation } from '../redux/features/weather/weatherApi';
-import { useAnalyzeSoilMutation } from '../redux/features/soil/soilApi';
+  CloudRainIcon,
+} from "lucide-react";
+import { useUser } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
+import { useGetWeatherByDistrictMutation } from "../redux/features/weather/weatherApi";
+import { useAnalyzeSoilMutation } from "../redux/features/soil/soilApi";
+import { useLazyGetCropsForSearchQueryQuery } from "../redux/features/crop/cropApi";
 
-
-const FLASK_BASE = import.meta.env.VITE_FLASK_BASE ?? 'http://localhost:5000';
+const FLASK_BASE = import.meta.env.VITE_FLASK_BASE ?? "http://localhost:5000";
 
 const districts = [
-  'Ampara', 'Anuradhapura', 'Badulla', 'Batticaloa', 'Colombo', 'Galle', 'Gampaha',
-  'Hambantota', 'Jaffna', 'Kalutara', 'Kandy', 'Kegalle', 'Kilinochchi', 'Kurunegala',
-  'Mannar', 'Matale', 'Matara', 'Monaragala', 'Mullaitivu', 'Nuwara Eliya',
-  'Polonnaruwa', 'Puttalam', 'Ratnapura', 'Trincomalee', 'Vavuniya'
+  "Ampara", "Anuradhapura", "Badulla", "Batticaloa", "Colombo", "Galle", "Gampaha",
+  "Hambantota", "Jaffna", "Kalutara", "Kandy", "Kegalle", "Kilinochchi", "Kurunegala",
+  "Mannar", "Matale", "Matara", "Monaragala", "Mullaitivu", "Nuwara Eliya",
+  "Polonnaruwa", "Puttalam", "Ratnapura", "Trincomalee", "Vavuniya",
 ];
 
 const SoilAnalysis = ({
@@ -33,6 +33,7 @@ const SoilAnalysis = ({
   soilType,
   confidence,
   heatMapUrl,
+  onRagResults,
 }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -40,8 +41,10 @@ const SoilAnalysis = ({
   const { isSignedIn } = useUser();
   const navigate = useNavigate();
 
-  const [fetchWeather, { data: weatherData, isLoading: isWeatherLoading, isError: weatherError }] = useGetWeatherByDistrictMutation();
+  const [fetchWeather, { data: weatherData, isLoading: isWeatherLoading, isError: weatherError }] =
+    useGetWeatherByDistrictMutation();
   const [analyzeSoil, { isLoading: isSoilLoading, isError: soilError }] = useAnalyzeSoilMutation();
+  const [triggerCropSearch] = useLazyGetCropsForSearchQueryQuery();
 
   const clearPrediction = () => onAnalysisComplete(null, null, null);
 
@@ -54,11 +57,9 @@ const SoilAnalysis = ({
     }
   };
 
-
-
   const handleAnalyze = async () => {
     if (!isSignedIn) {
-      navigate('/sign-in');
+      navigate("/sign-in");
       return;
     }
     if (!selectedImage || !selectedDistrict) return;
@@ -66,19 +67,37 @@ const SoilAnalysis = ({
     try {
       setIsAnalyzing(true);
 
-      // 1) Weather from Express
-      const weather = await fetchWeather(selectedDistrict).unwrap();
 
-      // 2) Soil + heatmap from Flask
+      const weather = await fetchWeather(selectedDistrict).unwrap();
+      const temp = Number(weather?.avg_temp_annual);
+      const hum = Number(weather?.avg_humidity_annual);
+      const rain = Number(weather?.total_rainfall_annual);
+
+
       const soil = await analyzeSoil(selectedImage).unwrap();
       const url = new URL(soil.image_url, FLASK_BASE);
-      url.searchParams.set('t', Date.now().toString());
+      url.searchParams.set("t", Date.now().toString());
       const fullHeatmapUrl = url.toString();
+
 
       onAnalysisComplete(soil.label, Number(soil.confidence) / 100, fullHeatmapUrl);
 
+
+      const detectedSoilType = soil.label;
+      console.log(detectedSoilType);
+
+      const queryText =
+        `Crops suitable for ${detectedSoilType} soil` +
+        `${!isNaN(temp) ? `, with temperature around ${temp.toFixed(0)}°C` : ""}` +
+        `${!isNaN(hum) ? `, with humidity about ${hum.toFixed(0)}%` : ""}` +
+        `${!isNaN(rain) ? `, and annual rainfall near ${rain.toFixed(0)} mm` : ""}`;
+
+
+      const data = await triggerCropSearch({ query: queryText }).unwrap();
+      console.log("RAG results:", data);
+      onRagResults?.(data);
     } catch (e) {
-      console.error('Analyze flow failed:', e);
+      console.error("Analyze flow failed:", e);
     } finally {
       setIsAnalyzing(false);
     }
@@ -100,7 +119,7 @@ const SoilAnalysis = ({
             {!previewUrl ? (
               <div
                 className="border-2 border-dashed border-gray-300 rounded-lg p-12 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => document.getElementById('soil-image-input')?.click()}
+                onClick={() => document.getElementById("soil-image-input")?.click()}
               >
                 <UploadCloudIcon className="h-12 w-12 text-green-600 mb-4" />
                 <p className="text-gray-500 text-center">Click to upload or drag and drop</p>
@@ -118,7 +137,12 @@ const SoilAnalysis = ({
                 <img src={previewUrl} alt="Soil preview" className="w-full h-64 object-cover rounded-lg" />
                 <button
                   className="absolute top-2 right-2 bg-red-500 p-2 rounded-full text-white hover:bg-red-600 transition-colors"
-                  onClick={() => { setSelectedImage(null); setPreviewUrl(null); clearPrediction(); }}
+                  onClick={() => {
+                    setSelectedImage(null);
+                    setPreviewUrl(null);
+                    clearPrediction();
+                    onRagResults?.([]);
+                  }}
                 >
                   <TrashIcon className="h-4 w-4" />
                 </button>
@@ -146,7 +170,7 @@ const SoilAnalysis = ({
               </div>
               <select
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                value={selectedDistrict || ''}
+                value={selectedDistrict || ""}
                 onChange={(e) => onDistrictSelect(e.target.value)}
               >
                 <option value="">Select a district</option>
@@ -161,20 +185,21 @@ const SoilAnalysis = ({
             <div className="mt-6 flex space-x-3">
               <button
                 className={`flex-grow py-3 rounded-lg font-medium flex items-center justify-center ${selectedImage && selectedDistrict
-                  ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white'
-                  : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  ? "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                  : "bg-gray-200 text-gray-500 cursor-not-allowed"
                   }`}
                 disabled={!selectedImage || !selectedDistrict || isAnalyzing}
                 onClick={handleAnalyze}
               >
                 <SearchIcon className="h-5 w-5 mr-2" />
-                {isAnalyzing ? 'Analyzing...' : 'Get Crop Suggestions'}
+                {isAnalyzing ? "Analyzing..." : "Get Crop Suggestions"}
               </button>
               <button
                 className="w-1/4 py-3 rounded-lg font-medium hover:bg-gray-300 border border-gray-300 flex items-center justify-center"
                 onClick={() => {
                   clearPrediction();
                   onClear();
+                  onRagResults?.([]);
                   setPreviewUrl(null);
                 }}
               >
@@ -184,16 +209,13 @@ const SoilAnalysis = ({
             </div>
           </div>
 
-
-
           <div className="bg-white p-6 rounded-xl shadow-sm">
             {!soilType ? (
-              <div className="h-64 flex items-center justify-center border border-gray-2 00 rounded-lg">
+              <div className="h-64 flex items-center justify-center border border-gray-200 rounded-lg">
                 <p className="text-gray-500">Upload a soil image and select your district to see results</p>
               </div>
             ) : (
               <div className="space-y-6">
-
                 {heatMapUrl && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
@@ -219,7 +241,6 @@ const SoilAnalysis = ({
                   </div>
                 )}
 
-
                 {selectedDistrict && (
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
                     <div className="flex items-center justify-between mb-4">
@@ -239,7 +260,6 @@ const SoilAnalysis = ({
                     ) : weatherData ? (
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
                           <div className="flex items-center space-x-3">
                             <div className="p-2 bg-amber-50 rounded-lg text-amber-600">
                               <ThermometerIcon className="h-5 w-5" />
@@ -252,7 +272,6 @@ const SoilAnalysis = ({
                             </div>
                           </div>
 
-
                           <div className="flex items-center space-x-3">
                             <div className="p-2 bg-teal-50 rounded-lg text-teal-600">
                               <DropletIcon className="h-5 w-5" />
@@ -260,11 +279,10 @@ const SoilAnalysis = ({
                             <div>
                               <p className="text-xs text-gray-500">Avg Humidity</p>
                               <p className="font-medium text-gray-800">
-                                {Number(weatherData.avg_humidity_annual).toFixed(2)}%
+                                {Number(weatherData.avg_humidity_annual).toFixed(0)}%
                               </p>
                             </div>
                           </div>
-
 
                           <div className="flex items-center space-x-3">
                             <div className="p-2 bg-sky-50 rounded-lg text-sky-600">
@@ -273,7 +291,7 @@ const SoilAnalysis = ({
                             <div>
                               <p className="text-xs text-gray-500">Annual Rainfall</p>
                               <p className="font-medium text-gray-800">
-                                {Number(weatherData.total_rainfall_annual).toFixed(1)} mm
+                                {Number(weatherData.total_rainfall_annual).toFixed(0)} mm
                               </p>
                             </div>
                           </div>
