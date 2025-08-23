@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+const rangeRegex = /^\s*\d+(\.\d+)?\s*(?:-\s*\d+(\.\d+)?\s*)?$/;
+
 export const cropSchema = z.object({
   name: z.string().min(1, "Crop name is required"),
   category: z.string().min(1, "Category is required"),
@@ -9,7 +11,11 @@ export const cropSchema = z.object({
   waterRequirements: z.string().optional(),
   soilRequirements: z.string().min(1, "Soil requirements are required"),
   fertilizers: z.string().optional(),
-  avgTemperature: z.coerce.number().min(-50, "Min -50°C").max(60, "Max 60°C"),
-  avgHumidity: z.coerce.number().min(0, "Min 0%").max(100, "Max 100%"),
-  rainfall: z.coerce.number().min(0, "Must be positive")
+
+  avgTemperature: z.string()
+    .regex(rangeRegex, "Temperature must be a number or a range like 25-27"),
+  avgHumidity: z.string()
+    .regex(rangeRegex, "Humidity must be a number or a range like 40-60"),
+  rainfall: z.string()
+    .regex(rangeRegex, "Rainfall must be a number or a range like 200-300"),
 });

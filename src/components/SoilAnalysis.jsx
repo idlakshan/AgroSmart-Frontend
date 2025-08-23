@@ -175,6 +175,7 @@ const SoilAnalysis = ({
                 onClick={() => {
                   clearPrediction();
                   onClear();
+                  setPreviewUrl(null);
                 }}
               >
                 <XIcon className="h-5 w-5 mr-2" />

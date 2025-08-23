@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import { cropSchema } from "../validation/cropShema";
 
 const categories = [
-  "Vegetable", "Fruit", "Grain", "Legume", "Herb"
+  "Vegetable", "Fruit", "Grain", "Legume", "Nut", "Other"
 ];
 
 const AdminCrops = () => {
@@ -170,8 +170,10 @@ const AdminCrops = () => {
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-600">Avg Temperature (°C)</label>
               <input
-                {...register("avgTemperature", { valueAsNumber: true })}
-                type="number"
+                {...register("avgTemperature")}
+                type="text"
+                placeholder="e.g., 20 or 20-25"
+                inputMode="decimal"
                 className="w-full text-sm border rounded-md p-2 focus:ring-2 focus:ring-sky-500"
               />
               {errors.avgTemperature && <p className="text-red-500 text-xs">{errors.avgTemperature.message}</p>}
@@ -179,8 +181,10 @@ const AdminCrops = () => {
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-600">Avg Humidity (%)</label>
               <input
-                {...register("avgHumidity", { valueAsNumber: true })}
-                type="number"
+                {...register("avgHumidity")}
+                type="text"
+                placeholder="e.g., 55 or 50-60"
+                inputMode="decimal"
                 className="w-full text-sm border rounded-md p-2 focus:ring-2 focus:ring-sky-500"
               />
               {errors.avgHumidity && <p className="text-red-500 text-xs">{errors.avgHumidity.message}</p>}
@@ -188,8 +192,10 @@ const AdminCrops = () => {
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-600">Rainfall (mm)</label>
               <input
-                {...register("rainfall", { valueAsNumber: true })}
-                type="number"
+                {...register("rainfall")}
+                type="text"
+                placeholder="e.g., 250 or 200-300"
+                inputMode="decimal"
                 className="w-full text-sm border rounded-md p-2 focus:ring-2 focus:ring-sky-500"
               />
               {errors.rainfall && <p className="text-red-500 text-xs">{errors.rainfall.message}</p>}
