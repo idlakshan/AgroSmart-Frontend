@@ -10,6 +10,7 @@ import {
   InfoIcon,
   CloudRainIcon,
 } from "lucide-react";
+import Swal from "sweetalert2"; 
 import { useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import { useGetWeatherByDistrictMutation } from "../redux/features/weather/weatherApi";
@@ -17,12 +18,13 @@ import { useAnalyzeSoilMutation } from "../redux/features/soil/soilApi";
 import { useLazyGetCropsForSearchQueryQuery } from "../redux/features/crop/cropApi";
 
 const FLASK_BASE = import.meta.env.VITE_FLASK_BASE ?? "http://localhost:5000";
+const CONF_THRESHOLD = 0.75; 
 
 const districts = [
-  "Ampara", "Anuradhapura", "Badulla", "Batticaloa", "Colombo", "Galle", "Gampaha",
-  "Hambantota", "Jaffna", "Kalutara", "Kandy", "Kegalle", "Kilinochchi", "Kurunegala",
-  "Mannar", "Matale", "Matara", "Monaragala", "Mullaitivu", "Nuwara Eliya",
-  "Polonnaruwa", "Puttalam", "Ratnapura", "Trincomalee", "Vavuniya",
+  "Ampara","Anuradhapura","Badulla","Batticaloa","Colombo","Galle","Gampaha",
+  "Hambantota","Jaffna","Kalutara","Kandy","Kegalle","Kilinochchi","Kurunegala",
+  "Mannar","Matale","Matara","Monaragala","Mullaitivu","Nuwara Eliya",
+  "Polonnaruwa","Puttalam","Ratnapura","Trincomalee","Vavuniya",
 ];
 
 const SoilAnalysis = ({
@@ -31,7 +33,7 @@ const SoilAnalysis = ({
   onClear,
   selectedDistrict,
   soilType,
-  confidence,
+  confidence,      
   heatMapUrl,
   onRagResults,
 }) => {
@@ -67,34 +69,42 @@ const SoilAnalysis = ({
     try {
       setIsAnalyzing(true);
 
+  
+      const soil = await analyzeSoil(selectedImage).unwrap();
+      const url = new URL(soil.image_url, FLASK_BASE);
+      url.searchParams.set("t", Date.now().toString());
+      const fullHeatmapUrl = url.toString();
+
+      const conf = Number(soil.confidence) / 100; 
+      onAnalysisComplete(soil.label, conf, fullHeatmapUrl);
+
+   
+      if (isNaN(conf) || conf < CONF_THRESHOLD) {
+      
+        Swal.fire({
+          icon: "warning",
+          title: "Low confidence",
+          text: "Please upload a clearer soil image (good lighting, in focus) or try another image.",
+          confirmButtonText: "OK",
+        });
+     
+        onRagResults?.([]);
+        return;
+      }
+
 
       const weather = await fetchWeather(selectedDistrict).unwrap();
       const temp = Number(weather?.avg_temp_annual);
       const hum = Number(weather?.avg_humidity_annual);
       const rain = Number(weather?.total_rainfall_annual);
 
-
-      const soil = await analyzeSoil(selectedImage).unwrap();
-      const url = new URL(soil.image_url, FLASK_BASE);
-      url.searchParams.set("t", Date.now().toString());
-      const fullHeatmapUrl = url.toString();
-
-
-      onAnalysisComplete(soil.label, Number(soil.confidence) / 100, fullHeatmapUrl);
-
-
-      const detectedSoilType = soil.label;
-      console.log(detectedSoilType);
-
       const queryText =
-        `Crops suitable for ${detectedSoilType} soil` +
+        `Crops suitable for ${soil.label} soil` +
         `${!isNaN(temp) ? `, with temperature around ${temp.toFixed(0)}°C` : ""}` +
         `${!isNaN(hum) ? `, with humidity about ${hum.toFixed(0)}%` : ""}` +
         `${!isNaN(rain) ? `, and annual rainfall near ${rain.toFixed(0)} mm` : ""}`;
 
-
       const data = await triggerCropSearch({ query: queryText }).unwrap();
-      console.log("RAG results:", data);
       onRagResults?.(data);
     } catch (e) {
       console.error("Analyze flow failed:", e);
@@ -102,6 +112,8 @@ const SoilAnalysis = ({
       setIsAnalyzing(false);
     }
   };
+
+  const showResults = soilType && confidence != null && Number(confidence) >= CONF_THRESHOLD;
 
   return (
     <section id="analysis" className="py-16 px-4 md:px-8 bg-gray-50">
@@ -154,7 +166,7 @@ const SoilAnalysis = ({
                         <p className="text-xs text-gray-500 uppercase font-medium">Soil Type</p>
                         <p className="font-bold text-gray-800">{soilType}</p>
                       </div>
-                      <div className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
+                      <div className={`px-2 py-1 rounded text-xs font-medium ${Number(confidence) >= CONF_THRESHOLD ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>
                         {(Number(confidence) * 100).toFixed(1)}% confidence
                       </div>
                     </div>
@@ -209,6 +221,7 @@ const SoilAnalysis = ({
             </div>
           </div>
 
+     
           <div className="bg-white p-6 rounded-xl shadow-sm">
             {!soilType ? (
               <div className="h-64 flex items-center justify-center border border-gray-200 rounded-lg">
@@ -216,7 +229,8 @@ const SoilAnalysis = ({
               </div>
             ) : (
               <div className="space-y-6">
-                {heatMapUrl && (
+         
+                {showResults && heatMapUrl && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="text-lg font-medium">Soil Analysis Heat Map</h4>
@@ -241,7 +255,8 @@ const SoilAnalysis = ({
                   </div>
                 )}
 
-                {selectedDistrict && (
+              
+                {showResults && selectedDistrict && (
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center">

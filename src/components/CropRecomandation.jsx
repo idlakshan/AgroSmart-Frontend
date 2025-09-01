@@ -18,6 +18,7 @@ const toViewModel = (item) => {
     idealTemperature: c.avgTemperature, 
     idealHumadity: c.avgHumidity, 
     idealRainfall: c.rainfall, 
+    idealFertilizers: c.fertilizers, 
   };
 };
 
